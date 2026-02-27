@@ -10,6 +10,9 @@ git status # gives us a rundown of files to remove/add which can be committed
 git add <file>
 git rm <file>
 
+To ensure the local system has all the files that are up-to date and need to be run we must pull from the repo
+git pull 
+
 Once either is done you can commit using 
 git commit -m '<insert the message>'
 git push # this pushes the changes to the main repository
