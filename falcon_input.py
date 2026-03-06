@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
+
 import rospy
 from geometry_msgs.msg import PoseStamped, WrenchStamped, Twist
 from sensor_msgs.msg import Joy
 import numpy as np
-import time
 
 class falcon:
 #sets up publishers, subscribers, init variables
@@ -30,7 +30,7 @@ class falcon:
 
 #main loop
     def main(self): 
-        r= rospy.Rate(500)
+        r= rospy.Rate(20)
 
         while not rospy.is_shutdown() and self.position is None: #sleep mode
             r.sleep()
