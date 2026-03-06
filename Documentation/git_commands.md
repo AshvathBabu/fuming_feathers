@@ -1,0 +1,18 @@
+# when starting off the repository it is important to have a local clone of the repository
+git clone [insert link]
+
+gh auth login
+and remember once you are done with the session to logout
+gh auth logout 
+
+git status # gives us a rundown of files to remove/add which can be committed
+! REMEMBER YOU CAN ONLY ADD OR REMOVE SEPERATELY 
+git add [file]
+git rm [file]
+
+# To ensure the local system has all the files that are up-to date and need to be run we must pull from the repo
+git pull 
+
+Once either is done you can commit using 
+git commit -m '[insert the message]'
+git push # this pushes the changes to the main repository
