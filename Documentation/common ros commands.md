@@ -1,13 +1,3 @@
-# Common ROS commands
-
-### make a file executable
-chmod +x ~/<workspace>/src/fuming_feathers/src/<filename>
-
-connect duckiebot
-export ROS_MASTER_URI=http://miroko.local:11311
-export ROS_IP=10.0.2.15
-roslaunch virtual_joystick virtual_joystick_gui.launch veh:=miroko
-
 # Programs
 ## PlotJuggler
 rosrun plotjuggler plotjuggler
@@ -16,6 +6,9 @@ rosrun rviz rviz
 ## Other executables
 rosrun fuming_feathers <file>
 [command] [package name] [executable]
+
+### Make a file executable
+chmod +x ~/<workspace>/src/fuming_feathers/src/<filename>
 
 ## rosbag
 rosbag record -O [title].bag /topic1 /topic2 --duration=5
