@@ -1,7 +1,7 @@
 # Setup Workspace
-mkdir -p ~/<workspace>/src
+mkdir -p ~/[workspace]/src
 
-cd ~/<workspace>/
+cd ~/[workspace]/
 
 catkin init
 
@@ -11,11 +11,11 @@ source devel/setup.bash
 
 
 # Create Package
-cd ~/<workspace>/src
+cd ~/[workspace]/src
 
 catkin create pkg [name] --catkin-deps [depend1] [depend 2]
 
-cd ~/<workspace>
+cd ~/[workspace]
 
 catkin build
 
@@ -25,12 +25,12 @@ rosrun plotjuggler plotjuggler
 ## RViz
 rosrun rviz rviz
 ## Other executables
-rosrun fuming_feathers <file>
+rosrun fuming_feathers [file]
 
 [command] [package name] [executable]
 
 ### Make a file executable
-chmod +x ~/<workspace>/src/fuming_feathers/src/<filename>
+chmod +x ~/[workspace]/src/fuming_feathers/src/[filename]
 
 ## rosbag
 rosbag record -O [title].bag /topic1 /topic2 --duration=5
