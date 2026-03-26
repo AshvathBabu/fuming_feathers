@@ -1,23 +1,30 @@
+# slingshot_sim.py
+# ---------------------------------------
+# Physics model: converts pull vector into projectile trajectory
+# ---------------------------------------
+
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 def simulate_slingshot(
-    X, Y, Z,
-    k,              # spring constant
-    m,              # mass
-    start_pos,
+    x, y, z,
+    k=5.0,                  # spring constant
+    m=1.0,                  # mass of projectile
+    start_pos=(0, 0.5, 0),  # starting position
     g=9.81,
     num_points=100
 ):
-    # --- Step 1: Stretch length ---
-    L = np.sqrt(X**2 + Y**2 + Z**2)
+    # --- Step 1: Compute pull length ---
+    L = np.sqrt(x**2 + y**2 + z**2)
 
-    # --- Step 2: Speed from spring energy ---
+    if L == 0:
+        raise ValueError("Zero pull vector")
+
+    # --- Step 2: Convert spring energy → speed ---
     speed = np.sqrt(k / m) * L
 
-    # --- Step 3: Direction ---
-    dx, dy, dz = X / L, Y / L, Z / L
+    # --- Step 3: Normalize direction ---
+    dx, dy, dz = x / L, y / L, z / L
 
     # --- Step 4: Velocity components ---
     vx = speed * dx
@@ -26,10 +33,10 @@ def simulate_slingshot(
 
     x0, y0, z0 = start_pos
 
-    # --- Step 5: Time of flight ---
+    # --- Step 5: Time of flight (Y is vertical axis) ---
     a = -0.5 * g
-    b = vz
-    c = z0
+    b = vy
+    c = y0
 
     discriminant = b**2 - 4*a*c
     if discriminant < 0:
@@ -39,56 +46,18 @@ def simulate_slingshot(
     T2 = (-b - np.sqrt(discriminant)) / (2*a)
     T = max(T1, T2)
 
-    # --- Step 6: Trajectory sampling ---
+    # --- Step 6: Sample trajectory ---
     times = np.linspace(0, T, num_points)
     points = []
 
     for t in times:
-        x = x0 + vx * t
-        y = y0 + vy * t
-        z = z0 + vz * t - 0.5 * g * t**2
+        X = x0 + vx * t
+        Y = y0 + vy * t - 0.5 * g * t**2
+        Z = z0 + vz * t
 
-        z = max(z, 0)
-        points.append([x, y, z])
+        # Prevent going below ground
+        Y = max(Y, 0)
+
+        points.append([X, Y, Z])
 
     return np.array(points), times, speed
-
-
-def main():
-    # ---- Inputs ----
-    X, Y, Z = 1.0, 0.0, 1.0
-    k = 5.0
-    m = 1.0
-    start_pos = (0, 0, 0.5)
-
-    # ---- Run simulation ----
-    points, times, speed = simulate_slingshot(
-        X, Y, Z,
-        k, m,
-        start_pos,
-        num_points=100
-    )
-
-    print(f"Launch speed: {speed:.2f} m/s")
-    print("First 5 points:\n", points[:5])
-
-    # ---- Plot ----
-    xs, ys, zs = points[:,0], points[:,1], points[:,2]
-
-    fig = plt.figure()
-    ax = fig.add_subplot(projection='3d')
-
-    ax.plot(xs, ys, zs)
-    ax.scatter(xs[0], ys[0], zs[0], label="Start")
-    ax.scatter(xs[-1], ys[-1], zs[-1], label="End")
-
-    ax.set_xlabel("X")
-    ax.set_ylabel("Y")
-    ax.set_zlabel("Z")
-
-    ax.legend()
-    plt.show(block=True)
-
-
-if __name__ == "__main__":
-    main()
