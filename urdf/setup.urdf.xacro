@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="cu_panda">
+    <xacro:include filename="$(find falcon_ros)/urdf/floating_grip.urdf.xacro"/>
+    <xacro:falcon/>
+  <xacro:include filename="$(find cu_panda_description)/robots/basic_setup.urdf.xacro"/>
+  <joint name="falcon_to_table" type="fixed">
+    <parent link="table_top"/>
+    <child link="falcon_base"/>
+    <origin xyz="0 0.8 0.13" rpy="${tau/4} 0 ${tau/4}"/>
+  </joint>
+
+  <!-- <link name='falcon_volume'>
+    <visual>
+        <geometry>
+            <box size="0.08 0.1 0.05"/>        
+        </geometry>
+        <material name="blue_vol">
+            <color rgba="0.0 0.0 1.0 0.1"/>    
+        </material>
+    </visual>
+  </link>
+  <joint name="falcon_volume_to_base" type="fixed">
+    <parent link="falcon_front"/>
+    <child link="falcon_volume"/>
+    <origin xyz="0 0.0 0.12" rpy="${tau/2} ${-tau/4} ${tau/4}"/>
+  </joint> -->
+
+  <!-- <link name='panda_volume'>
+    <visual>
+        <geometry>
+            <box size="0.1 0.1 0.1"/>        
+        </geometry>
+        <material name="blue_vol">
+            <color rgba="0.0 0.0 1.0 0.1"/>    
+        </material>
+    </visual>
+  </link>
+  <joint name="panda_volume_to_hand" type="fixed">
+    <parent link="panda_hand_tcp"/>
+    <child link="panda_volume"/>
+    <origin xyz="0.0 0.0 0.0" rpy="${tau/2} 0 0"/>
+  </joint> -->
+
+  <link name='table_volume' />
+  <joint name="panda_volume_to_table_top" type="floating">
+    <parent link="table_top"/>
+    <child link="table_volume"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <!-- <link name='falcon_volume' />
+  <joint name="panda_volume_to_table_top" type="floating">
+    <parent link="table_top"/>
+    <child link="table_volume"/>
+    <origin xyz="0 0 0" rpy="${tau/2} ${-tau/4} ${tau/4}"/>
+  </joint> -->
+
+  <!-- <link name='panda_table_volume'>
+    <visual>
+        <geometry>
+            <box size="0.5 0.5 0.5"/>        
+        </geometry>
+        <material name="blue_vol">
+            <color rgba="0.0 0.0 1.0 0.1"/>    
+        </material>
+    </visual>
+  </link>
+  <joint name="panda_volume_to_table" type="fixed">
+    <parent link="table_top"/>
+    <child link="panda_table_volume"/>
+    <origin xyz="0.0 0.2 0.29" rpy="0 0 0"/>
+  </joint> -->
+
+    <!-- <link name='falcon_volume_flipped'>
+    <visual>
+        <geometry>
+            <box size="0.1 0.1 0.1"/>        
+        </geometry>
+        <material name="blue_vol">
+            <color rgba="0.0 0.0 1.0 0.1"/>    
+        </material>
+    </visual>
+  </link>
+  <joint name="falcon_volume_flipped_to_base" type="fixed">
+    <parent link="falcon_front"/>
+    <child link="falcon_volume_flipped"/>
+    <origin xyz="0 0.0 0.12" rpy="${tau/2} ${-tau/2} ${tau/4}"/>
+  </joint> -->
+
+<link name="pen">
+  <visual>
+    <origin xyz="0 0 -0.0635" rpy="0 0 0"/>
+    <geometry>
+      <cylinder radius="0.0083" length="0.129"/>
+    </geometry>
+    <material name="pen_rad">
+      <color rgba="0.0 1.0 0.0 0.5"/>
+    </material>
+  </visual>
+
+  <!-- <collision>
+    <origin xyz="0 0 -0.0635 " rpy="0 0 0"/>
+    <geometry>
+      <cylinder radius="0.01" length="0.127"/>
+    </geometry>
+  </collision> -->
+</link>
+<joint name="pen_joint" type="fixed">
+  <parent link="panda_hand_tcp"/>
+  <child link="pen"/>
+  <origin xyz="0 0 0.097" rpy="0 0 0"/>
+</joint>
+
+
+</robot>

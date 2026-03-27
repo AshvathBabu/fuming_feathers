@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<!-- load rviz with a useful config -->
+<launch>
+    <node pkg="rviz" type="rviz" name="$(anon rviz)" args="-d $(dirname)/../config/default.rviz" />
+</launch>
