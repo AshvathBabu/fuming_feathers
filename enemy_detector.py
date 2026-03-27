@@ -55,18 +55,23 @@ class enemy_detector:
                         depths.append(depth)
         return depths
     
-    #setup, run at start
+    #loop, all block colors and mask to find blocks
+    def get_contours_for_color(self, hsv, color):
+        lower, upper = self.color_ranges[color]
+        lower_np = np.array(lower)
+        upper_np = np.array(upper)
+        mask = cv2.inRange(hsv, lower_np, upper_np)
+
+        #ignore hierarchy
+        #convert b&w mask, ignore holes, and compress points
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        return contours
+    
+    #setup frame, run at start
     def initialize_blocks(self, hsv):
         self.initial_depths = {}
-        
-        #loop, all block colors and mask to find blocks
-        for color, (lower, upper) in self.color_ranges.items():
-            lower_np = np.array(lower)
-            upper_np = np.array(upper)
-            mask = cv2.inRange(hsv, lower_np, upper_np)
-            #block shape
-            contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            
+        for color in self.color_ranges.keys():
+            contours = self.get_contours_for_color(hsv, color)
             self.initial_depths[color] = self.get_block_depths(contours)
         
         self.blocks_initialized = True #confirm
@@ -77,7 +82,7 @@ class enemy_detector:
         if self.color_current is None:
             return
         
-        #convert to hsv
+        #convert to bgr to hsv
         hsv = cv2.cvtColor(self.color_current, cv2.COLOR_BGR2HSV)
         
         if not self.blocks_initialized: #initialize if first time
@@ -123,13 +128,8 @@ class enemy_detector:
     def detect_current_blocks(self, hsv):
         current_blocks = {}
         
-        for color, (lower, upper) in self.color_ranges.items():
-            lower_np = np.array(lower)
-            upper_np = np.array(upper)
-            mask = cv2.inRange(hsv, lower_np, upper_np)
-            
-            contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            
+        for color in self.color_ranges.keys():
+            contours = self.get_contours_for_color(hsv, color)
             current_blocks[color] = self.get_block_depths(contours)
         
         #initial vs current
