@@ -44,9 +44,9 @@ class enemy_detector:
     #get center point, depth, store array
     def get_block_depths(self, contours):
         depths = []
-        for cnt in contours:
-            if cv2.contourArea(cnt) > 500:
-                M = cv2.moments(cnt)
+        for i in contours:
+            if cv2.contourArea(i) > 500:
+                M = cv2.moments(i)
                 if M["m00"] != 0:
                     cx = int(M["m10"] / M["m00"])
                     cy = int(M["m01"] / M["m00"])
