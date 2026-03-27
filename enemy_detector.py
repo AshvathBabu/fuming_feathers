@@ -17,8 +17,8 @@ class enemy_detector:
         self.score_pub = rospy.Publisher('/fuming_feathers/score', Int32, queue_size=1)
 
         #subscribers, color and point cloud
-        self.color_sub = rospy.Subscriber('/camera/rgb/image_raw', Image, self.color_callback)
-        self.depth_sub = rospy.Subscriber('/camera/depth/points', PointCloud2, self.depth_callback)
+        self.color_sub = rospy.Subscriber('/realsense/color/image_raw', Image, self.color_callback)
+        self.depth_sub = rospy.Subscriber('/realsense/depth/points', PointCloud2, self.depth_callback)
         
         #variable declaration
         self.color_current = None
