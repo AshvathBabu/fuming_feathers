@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # slingshot_sim.py
 # ---------------------------------------
 # Physics model: converts pull vector into projectile trajectory
