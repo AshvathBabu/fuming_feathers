@@ -1,1 +1,3 @@
 
+LException: [simulation.launch] requires the 'complete' arg to be set
+The traceback for the exception was written to the log file
