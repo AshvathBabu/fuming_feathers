@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="falcon_input" pkg="fuming_feathers" type="falcon_input" output="screen">
+    </node>
+
+    <node name="slingshot_sim" pkg="fuming_feathers" type="slingshot_sim" output="screen">
+    </node>
+
+</launch>
