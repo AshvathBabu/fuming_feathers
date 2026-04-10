@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <launch>
     
+    <arg name="complete" default="false"/>
+
     <include if="$(arg complete)" file="$(dirname)/launch/prerequisites.launch" />
 
     <node name="falcon_input" pkg="fuming_feathers" type="falcon_input.py" output="screen">
