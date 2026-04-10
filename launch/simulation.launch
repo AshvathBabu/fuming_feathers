@@ -12,14 +12,14 @@
     <node name="slingshot_node" pkg="fuming_feathers" type="slingshot_node.py" output="screen">
     </node>
 
-    <!--node name="game_backend2" pkg="fuming_feathers" type="game_backend2.py" output="screen">
+    <node name="game_backend2" pkg="fuming_feathers" type="game_backend2.py" output="screen">
     </node>
 
     <node name="game_frontend" pkg="fuming_feathers" type="game_frontend.py" output="screen">
     </node>
 
     <node name="enemy_detector" pkg="fuming_feathers" type="enemy_detector.py" output="screen">
-    </node-->
+    </node>
 
     <!--node name="panda_output" pkg="fuming_feathers" type="panda_output.py" output="screen">
     </node-->
