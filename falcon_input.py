@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import rospy
-from geometry_msgs.msg import PoseStamped, WrenchStamped, Twist
+from geometry_msgs.msg import PoseStamped, WrenchStamped, TwistStamped
 from sensor_msgs.msg import Joy
 import numpy as np
 
@@ -14,7 +14,7 @@ class falcon:
         #publisher
         self.pub = rospy.Publisher('falcon/servo_cf', WrenchStamped, queue_size=1)
             #for panda Twist messages
-        self.velocity_pub = rospy.Publisher('/fuming_feathers/velocity_cmd', Twist, queue_size=1)
+        self.velocity_pub = rospy.Publisher('/fuming_feathers/velocity_cmd', TwistStamped, queue_size=1)
         #subscribers
         self.position_sub = rospy.Subscriber('falcon/measured_cp', PoseStamped, self.get_position)
         self.joy_sub = rospy.Subscriber('falcon/joy', Joy, self.joy_callback)
@@ -112,13 +112,14 @@ class falcon:
 
 #added, give vector to panda, panda file will check limits
     def publish_panda_command(self, vector):
-        twist = Twist()
-        scale = 2.0 #multiply with distance to get vel, so this is 0.2 m/s for 10cm
+        twist = TwistStamped()
+        scale = 200.0 #multiply with distance to get vel, so this is 0.2 m/s for 10cm
 
         #set twist linear velocity fields x,y,z
-        twist.linear.x = vector[0] * scale
-        twist.linear.y = vector[1] * scale
-        twist.linear.z = vector[2] * scale
+        twist.header.frame_id = 'falcon_grip'
+        twist.twist.linear.x = vector[0] * scale
+        twist.twist.linear.y = vector[1] * scale
+        twist.twist.linear.z = vector[2] * scale
         
         self.velocity_pub.publish(twist)
         rospy.loginfo("Published velocity to Panda")

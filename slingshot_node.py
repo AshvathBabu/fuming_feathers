@@ -9,7 +9,7 @@
 # ---------------------------------------
 
 import rospy
-from geometry_msgs.msg import Twist, Point
+from geometry_msgs.msg import TwistStamped, Point
 from visualization_msgs.msg import Marker
 
 from slingshot_sim import simulate_slingshot
@@ -22,7 +22,7 @@ class SlingshotNode:
         # --- Subscribe to Falcon output ---
         self.sub = rospy.Subscriber(
             "/fuming_feathers/velocity_cmd",
-            Twist,
+            TwistStamped,
             self.callback
         )
 
@@ -76,9 +76,9 @@ class SlingshotNode:
     # ---------------------------------------
     def callback(self, msg):
         # --- Step 1: Extract vector ---
-        x = msg.linear.x / self.scale
-        y = msg.linear.y / self.scale
-        z = msg.linear.z / self.scale
+        x = msg.twist.linear.x / self.scale
+        y = msg.twist.linear.y / self.scale
+        z = msg.twist.linear.z / self.scale
 
         rospy.loginfo(f"Pull vector: {x:.3f}, {y:.3f}, {z:.3f}")
 
