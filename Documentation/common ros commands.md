@@ -77,3 +77,23 @@ rosnode info /node_name
 # Parameters
 ## List all parameters
 rosparam list
+
+
+# test enemy_detector
+chmod +x ~/ros/src/fuming_feathers/enemy_detector.py
+
+roscore
+rosrun fuming_feathers enemy_detector.py
+
+rosnode list [find enemy_detector node to see if running]:#
+rosnode info /enemy_detector
+rostopic list | grep realsense
+
+rostopic hz /realsense/color/image_raw
+rostopic hz /realsense/depth/points
+rqt_image_view
+
+rqt_console
+rostopic echo /fuming_feathers/score
+
+
