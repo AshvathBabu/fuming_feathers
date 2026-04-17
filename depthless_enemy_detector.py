@@ -28,9 +28,9 @@ class enemy_detector:
         
         #hsv color ranges
         self.color_ranges = {
-            'red':   ([3, 31, 42],   [7, 83, 82]),
-            'green': ([112, 39, 29], [119, 76, 60]),
-            'blue':  ([200, 40, 32], [206, 79, 85])
+            'red':   ([0, 21, 32],   [17, 93, 92]),
+            'green': ([102, 29, 19], [129, 86, 70]),
+            'blue':  ([190, 30, 22], [216, 89, 95])
         }
         
         #point/scoring system
@@ -77,6 +77,7 @@ class enemy_detector:
         
         #convert bgr to hsv
         hsv = cv2.cvtColor(self.color_current, cv2.COLOR_BGR2HSV)
+        print(f"HSV shape: {hsv.shape}, min: {hsv.min()}, max: {hsv.max()}")
         
         if not self.blocks_initialized:
             print(f"\n[frame {self.frame_count}], first frame - initializing reference")
@@ -107,7 +108,7 @@ class enemy_detector:
             
             # Draw green boxes
             for cnt in contours:
-                if cv2.contourArea(cnt) > 500:
+                if cv2.contourArea(cnt) > 100:
                     x, y, w, h = cv2.boundingRect(cnt)
                     cv2.rectangle(self.color_current, (x, y), (x+w, y+h), (0, 255, 0), 2)
                     cv2.putText(self.color_current, color, (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
