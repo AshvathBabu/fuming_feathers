@@ -10,6 +10,7 @@ from std_msgs.msg import Int32
 class enemy_detector:
     #initializer
     def __init__(self):
+        print("starting enemy detector node") #check
         rospy.init_node('enemy_detector')
         
         self.bridge = CvBridge()
@@ -19,18 +20,20 @@ class enemy_detector:
         #subscribers, color and point cloud
         self.color_sub = rospy.Subscriber('/realsense/color/image_raw', Image, self.color_callback)
         self.depth_sub = rospy.Subscriber('/realsense/depth/points', PointCloud2, self.depth_callback)
+        print("subscribed to realsense topics, waiting for data") #check
         
         #variable declaration
         self.color_current = None
         self.depth_current = None
         self.initial_depths = {}
         self.blocks_initialized = False
+        self.frame_count = 0 
         
         #hsv color ranges
         self.color_ranges = {
-            'red':   ([0, 100, 100],   [10, 255, 255]),
-            'green': ([40, 100, 100],  [80, 255, 255]),
-            'blue':  ([100, 100, 100], [140, 255, 255])
+            'red':   ([3, 31, 42],   [7, 83, 82]),
+            'green': ([112, 39, 29], [119, 76, 60]),
+            'blue':  ([200, 40, 32], [206, 79, 85])
             #add more here, or change if diff colors
         }
         
@@ -69,12 +72,13 @@ class enemy_detector:
     
     #setup frame, run at start
     def initialize_blocks(self, hsv):
-        self.initial_depths = {}
+        print("initializing blocks, capturing reference frame") #check
         for color in self.color_ranges.keys():
             contours = self.get_contours_for_color(hsv, color)
             self.initial_depths[color] = self.get_block_depths(contours)
         
         self.blocks_initialized = True #confirm
+        print("reference captured, now monitoring for changes") #check
         rospy.loginfo("Initialized depth values: %s", self.initial_depths)
     
     #check image and blocks
@@ -82,12 +86,16 @@ class enemy_detector:
         if self.color_current is None:
             return
         
+        self.frame_count += 1
+        
         #convert to bgr to hsv
         hsv = cv2.cvtColor(self.color_current, cv2.COLOR_BGR2HSV)
         
         if not self.blocks_initialized: #initialize if first time
+            print(f"\n[frame {self.frame_count}], first frame - initializing reference")
             self.initialize_blocks(hsv)
         else:
+            print(f"\n[frame {self.frame_count}], checking for changes")
             self.detect_current_blocks(hsv) #update frame and detect
 
     #get each new image, convert to opencv, save current colors, process blocks
@@ -118,7 +126,7 @@ class enemy_detector:
         #find approximate 3D location (update after calibration)
         for point in points:
             #2d projection
-            px = int(point[0] * 100)  #test if depth cam or just point cloud
+            px = int(point[0] * 100)
             py = int(point[1] * 100)
             if abs(px - x) < 10 and abs(py - y) < 10:
                 return point[2]  #return depth, or z
@@ -130,23 +138,54 @@ class enemy_detector:
         
         for color in self.color_ranges.keys():
             contours = self.get_contours_for_color(hsv, color)
-            current_blocks[color] = self.get_block_depths(contours)
+
+            #green box visualization
+            for cnt in contours:
+                if cv2.contourArea(cnt) > 500: #bigger than 500 px, change if not detecting
+                    x, y, w, h = cv2.boundingRect(cnt) #coor
+                    cv2.rectangle(self.color_current, (x, y), (x+w, y+h), (0, 255, 0), 2) #green box
+                    cv2.putText(self.color_current, color, (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2) #color name
         
+            current_blocks[color] = self.get_block_depths(contours)
+            print(f"    currently seeing {len(current_blocks[color])} {color} blocks at depths {[round(d,3) for d in current_blocks[color]]}")
+        
+            # Show image
+            cv2.imshow("Block Detection", self.color_current)
+            cv2.waitKey(1)
+            print("\n  comparing reference vs current frame:")
         #initial vs current
+        knockdown_happened = False
         for color in self.color_ranges.keys():
             initial_depths = self.initial_depths.get(color, [])
             current_depths = current_blocks.get(color, [])
             
+            print(f"    {color}: reference={len(initial_depths)} blocks, current={len(current_depths)} blocks")
+            
+            blocks_to_remove = []
             for init_depth in initial_depths:
-                #if missing, then it's knocked down
-                if not any(abs(init_depth - curr) < 0.05 for curr in current_depths): 
-                    #start scoring system, send to game file
+                #check if this specific block is still there
+                still_there = False
+                for curr in current_depths:
+                    if abs(init_depth - curr) < 0.05:
+                        still_there = True
+                        print(f"      block at depth {init_depth:.3f} still standing (matches {curr:.3f})")
+                        break
+                
+                if not still_there:
+                    #if missing, then it's knocked down
+                    print(f"      block removed! {color} at depth {init_depth:.3f} is gone <<<")
                     points = self.points_per_color.get(color, 0)
                     self.score_pub.publish(points)
-                    rospy.loginfo("%s block knocked down, +%d points sent to game file", 
-                                  color, points)
-                    #update initial list
-                    self.initial_depths[color].remove(init_depth)
+                    print(f"      >>> +{points} points sent to game file <<<")
+                    blocks_to_remove.append(init_depth)
+                    knockdown_happened = True
+            
+            #remove knocked down blocks from baseline
+            for depth in blocks_to_remove:
+                self.initial_depths[color].remove(depth)
+        
+        if not knockdown_happened:
+            print("    no knockdowns detected this frame")
     
     def run(self):
         rospy.spin()
