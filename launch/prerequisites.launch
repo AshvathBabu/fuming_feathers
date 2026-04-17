@@ -1,18 +1,23 @@
 <?xml version="1.0"?>
 <launch>
-    <include file="$(find cu_panda_bringup)/hardware.launch">
+    <include file="$(find cu_panda_bringup)/launch/hardware.launch">
         <arg name="rviz" default="false" /> 
     </include>
 
-    <node name="falcon" pkg="falcon_ros" type="driver" output="screen">
-        <param name="frame_id" value="falcon_front"/>
-    </node>
-    <node name="falcon_grip_state" pkg="falcon_ros" type="grip_state"/>
+    <group ns="falcon">
+        <node name="falcon" pkg="falcon_ros" type="driver" output="screen">
+            <param name="frame_id" value="falcon_front"/>
+        </node>
+        <node name="falcon_grip_state" pkg="falcon_ros" type="grip_state"/>
 
-    <param name="robot_description" command="xacro $(dirname)/../urdf/setup.urdf.xacro"/>
+        <param name="robot_description" command="xacro $(find falcon_ros)/robots/standalone.urdf.xacro"/>
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+    </group>
+
+    <node name="falcon_panda_tf" pkg="tf2_ros" type="static_transform_publisher" args="0.4 0.7 0 0 0 0 table world"/>
+
 
     <!-- <include file="$(find falcon_controller)/launch/mapper.launch"/> -->
-    <include file="$(dirname)/launch/rviz.launch"/>
+    <include file="$(dirname)/rviz.launch"/>
 
-    
 </launch>
