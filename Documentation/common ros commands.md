@@ -95,5 +95,7 @@ rqt_image_view
 
 rqt_console
 rostopic echo /fuming_feathers/score
+rosrun rqt_image_view rqt_image_view /realsense/color/image_raw
+
 
 
