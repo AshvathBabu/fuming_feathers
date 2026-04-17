@@ -32,7 +32,7 @@ class enemy_detector:
         #hsv color ranges
         self.color_ranges = {
             'red':   ([3, 31, 42],   [7, 83, 82]),
-            'green': ([112, 39, 29], [119, 76, 60]),
+            'green': ([129, 41.2, 16.1], [151.5, 48.8, 38]), #changed
             'blue':  ([200, 40, 32], [206, 79, 85])
             #add more here, or change if diff colors
         }
