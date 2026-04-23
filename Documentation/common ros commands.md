@@ -9,6 +9,8 @@ catkin build
 
 source devel/setup.bash
 
+### remove random r character
+sed -i '1s/^r//' filename.py
 
 # Create Package
 cd ~/[workspace]/src
