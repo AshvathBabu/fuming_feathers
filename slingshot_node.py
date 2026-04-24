@@ -91,7 +91,7 @@ class SlingshotNode:
         rospy.loginfo(f"Launch speed: {speed:.2f} m/s")
 
         # --- Step 4: Scale trajectory for safety ---
-        points = points * 0.3
+        points = points * 1
 
         # --- Step 5: Publish to RViz ---
         self.publish_trajectory_marker(points)

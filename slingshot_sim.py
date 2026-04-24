@@ -12,7 +12,7 @@ def simulate_slingshot(
     x, y, z,
     k=5.0,                  # spring constant
     m=1.0,                  # mass of projectile
-    start_pos=(0, 0.5, 0),  # starting position
+    start_pos=(0.2, 0.2, 0.4),  # starting position
     g=9.81,
     num_points=100
 ):
@@ -37,8 +37,8 @@ def simulate_slingshot(
 
     # --- Step 5: Time of flight (Y is vertical axis) ---
     a = -0.5 * g
-    b = vy
-    c = y0
+    b = vz
+    c = z0
 
     discriminant = b**2 - 4*a*c
     if discriminant < 0:
@@ -54,11 +54,11 @@ def simulate_slingshot(
 
     for t in times:
         X = x0 + vx * t
-        Y = y0 + vy * t - 0.5 * g * t**2
-        Z = z0 + vz * t
+        Y = y0 + vy * t 
+        Z = z0 + vz * t - 0.5 * g * t**2
 
         # Prevent going below ground
-        Y = max(Y, 0)
+        Z = max(Z, 0)
 
         points.append([X, Y, Z])
 

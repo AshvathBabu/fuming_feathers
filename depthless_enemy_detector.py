@@ -6,6 +6,15 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from std_msgs.msg import Int32
 
+'''
+HSV at pixels (519,256): [ 19  15 190]
+HSV at pixels (7,562): [ 30  11 145]
+HSV at pixels (1215,703): [ 30   6 160]
+HSV at pixels (1249,325): [ 93  12 190]
+
+LIMIT TO THESE PIXELS
+'''
+
 class enemy_detector:
     #initializer
     def __init__(self):
@@ -27,9 +36,9 @@ class enemy_detector:
         
         #hsv color ranges - CHANGE IF ERRORS
         self.color_ranges = {
-            'red':   ([0, 160, 140],   [10, 200, 180]),
-            'green': ([46, 130, 100], [66, 170, 140]),
-            'blue':  ([91, 160, 120], [111, 200, 170])
+            'red':   ([0, 160, 75],   [10, 200, 180]),
+            'green': ([46, 125, 34], [66, 170, 140]),
+            'blue':  ([91, 160, 65], [111, 220, 170])
         }
         
         #point/scoring system
