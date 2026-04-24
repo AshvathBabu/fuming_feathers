@@ -83,7 +83,7 @@ class SlingshotNode:
         rospy.loginfo(f"Pull vector: {x:.3f}, {y:.3f}, {z:.3f}")
 
         # --- Step 2: Reverse direction (release) ---
-        x, y, z = -x, -y, -z
+        x, y, z = -x, -y, z
 
         # --- Step 3: Simulate trajectory ---
         points, times, speed = simulate_slingshot(x, y, z)

@@ -10,12 +10,15 @@ import numpy as np
 
 def simulate_slingshot(
     x, y, z,
-    k=5.0,                  # spring constant
+    k=0.1,                  # spring constant
     m=1.0,                  # mass of projectile
-    start_pos=(0.2, 0.2, 0.4),  # starting position
+    start_pos=(0.2, 0.2, 0.2),  # starting position
     g=9.81,
     num_points=100
 ):
+    temp = y
+    y = z
+    z = temp
     # --- Step 1: Compute pull length ---
     L = np.sqrt(x**2 + y**2 + z**2)
 
