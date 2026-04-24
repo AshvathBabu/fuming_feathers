@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import rospy
-from geometry_msgs.msg import PoseStamped, WrenchStamped, TwistStamped
+from geometry_msgs.msg import PoseStamped, WrenchStamped, TwistStamped, Bool
 from sensor_msgs.msg import Joy
 import numpy as np
 
@@ -15,7 +15,7 @@ class falcon:
         self.pub = rospy.Publisher('falcon/servo_cf', WrenchStamped, queue_size=1)
             #for panda Twist messages
         self.velocity_pub = rospy.Publisher('/fuming_feathers/velocity_cmd', TwistStamped, queue_size=1)
-        self.centrebutton = rospy.Publisher('/fuming_feathers/centre_button_state', bool, queue_size=1)
+        self.centrebutton = rospy.Publisher('/fuming_feathers/centre_button_state', Bool, queue_size=1)
         #subscribers
         self.position_sub = rospy.Subscriber('falcon/measured_cp', PoseStamped, self.get_position)
         self.joy_sub = rospy.Subscriber('falcon/joy', Joy, self.joy_callback)
@@ -43,6 +43,9 @@ class falcon:
             if self.detect_release():
                 vector = self.calculate_pull_vector()
                 self.publish_panda_command(vector)
+            #continuously publish button state
+            self.centrebutton.publish(self.button_pressed)
+            
 
 #user haptic feedback by falcon
     def servo_cf(self): #
