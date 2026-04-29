@@ -16,9 +16,16 @@ def simulate_slingshot(
     g=9.81,
     num_points=100
 ):
+    # --- Axis limits (adjust as needed) ---
+    X_MIN, X_MAX = 0.0, 1.5
+    Y_MIN, Y_MAX = -0.2, 0.7
+    Z_MIN, Z_MAX = 0.2, 1.5
+
+    # Swap axes
     temp = y
     y = z
     z = temp
+    
     # --- Step 1: Compute pull length ---
     L = np.sqrt(x**2 + y**2 + z**2)
 
@@ -38,7 +45,7 @@ def simulate_slingshot(
 
     x0, y0, z0 = start_pos
 
-    # --- Step 5: Time of flight (Y is vertical axis) ---
+    # --- Step 5: Time of flight (Z is vertical axis) ---
     a = -0.5 * g
     b = vz
     c = z0
@@ -61,7 +68,13 @@ def simulate_slingshot(
         Z = z0 + vz * t - 0.5 * g * t**2
 
         # Prevent going below ground
-        Z = max(Z, 0)
+        # Z = max(Z, 0)
+
+        # Stop if outside bounds
+        if not (X_MIN <= X <= X_MAX and
+                Y_MIN <= Y <= Y_MAX and
+                Z_MIN <= Z <= Z_MAX):
+            break
 
         points.append([X, Y, Z])
 
