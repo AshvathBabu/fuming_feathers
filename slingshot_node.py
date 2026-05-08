@@ -9,11 +9,11 @@
 # ---------------------------------------
 
 import rospy
-from geometry_msgs.msg import TwistStamped, Point
+from geometry_msgs.msg import TwistStamped, Point, Pose
 from visualization_msgs.msg import Marker
-
+from moveit_commander import MoveGroupCommander
 from slingshot_sim import simulate_slingshot
-
+from moveit_msgs.msg import DisplayTrajectory
 
 class SlingshotNode:
     def __init__(self):
@@ -36,7 +36,7 @@ class SlingshotNode:
         # Falcon scaling factor (must match falcon_input.py)
         self.scale = 2.0
 
-        rospy.loginfo("Slingshot node ready (RViz mode)")
+        rospy.loginfo("Slingshot node ready (RViz mouide)")
 
     # ---------------------------------------
     # Convert trajectory → RViz Marker
@@ -96,6 +96,23 @@ class SlingshotNode:
 
         # --- Step 5: Publish to RViz ---
         self.publish_trajectory_marker(points)
+
+        # robot traj
+        poses= []
+        for p in points:
+            pt = Pose()
+            pt.position.x, pt.position.y, pt.position.z = p[0], p[1], p[2]
+            pt.orientation.x = -0.7082269342272834
+            pt.orientation.y = -0.7058263855613506
+            pt.orientation.z = -0.014673126208097463
+            pt.orientation.w = 0.002902145362304433
+            poses.append(pt)
+        mgc= MoveGroupCommander("arm")
+        traj, fraction = mgc.compute_cartesian_path(poses, 0.002)
+        rospy.loginfo(f"robot could follow through {fraction*100:.2}% of the throwing path")
+        trajectory_pub = rospy.Publisher('slingshot_robot_trajectory', DisplayTrajectory, queue_size= 1, latch= True)
+        trajectory_pub.publish(DisplayTrajectory(trajectory = [traj]))
+        mgc.execute(traj)
 
 
 if __name__ == "__main__":
