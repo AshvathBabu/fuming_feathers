@@ -44,13 +44,14 @@ class SlingshotNode:
     def publish_trajectory_marker(self, points):
         marker = Marker()
 
-        marker.header.frame_id = "panda_link0"  # IMPORTANT frame
+        marker.header.frame_id = "table_top"  # IMPORTANT frame
         marker.header.stamp = rospy.Time.now()
 
         marker.ns = "slingshot"
         marker.id = 0
         marker.type = Marker.LINE_STRIP
         marker.action = Marker.ADD
+        marker.pose.orientation.w= 1.0
 
         # Line thickness
         marker.scale.x = 0.01
@@ -83,7 +84,7 @@ class SlingshotNode:
         rospy.loginfo(f"Pull vector: {x:.3f}, {y:.3f}, {z:.3f}")
 
         # --- Step 2: Reverse direction (release) ---
-        x, y, z = -x, -y, z
+        x, y, z = y, x, -z
 
         # --- Step 3: Simulate trajectory ---
         points, times, speed = simulate_slingshot(x, y, z)
