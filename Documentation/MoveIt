@@ -1,0 +1,24 @@
+mgc= MoveGroupCommander("arm")
+mgc.set_named_target("home")
+mgc.go()
+mgc.set_named_target("fuming_feathers_start")
+from geometry_msgs.msg import PoseStamped
+p1=PoseStamped()
+mgc.get_current_pose()
+pc= mgc.get_current_pose()
+from copy import deepcopy
+p2= deepcopy(pc)
+mgc.compute_cartesian_path([pc.pose,p2.pose], 0.002)
+result = mgc.compute_cartesian_path([pc.pose,p2.pose], 0.002)
+result.size()
+result.count()
+traj= result[0]
+mgc.execute(traj)
+mgc.set_named_target("fuming_feathers_start")
+from moveit_msgs.msg import DisplayTrajectory
+dtraj = DisplayTrajectory()
+dtraj.trajectory = [traj]
+pub = rospy.Publisher('slingshot_robot_trajectory', queue_size=1)
+pub = rospy.Publisher('slingshot_robot_trajectory', DisplayTrajectory, queue_size=1)
+pub.publish(dtraj)
+dtraj.trajectory = [traj]
