@@ -5,7 +5,7 @@
 
     <include if="$(arg complete)" file="$(dirname)/prerequisites.launch" />
 
-    <node name="falcon_input" pkg="fuming_feathers" type="falcon_input.py" output="screen">
+    <node ns="falcon" name="falcon_input" pkg="fuming_feathers" type="falcon_input.py" output="screen">
     </node>
 
     <node name="slingshot_sim" pkg="fuming_feathers" type="slingshot_sim.py" output="screen">

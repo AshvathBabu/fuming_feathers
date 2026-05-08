@@ -10,16 +10,16 @@ import numpy as np
 
 def simulate_slingshot(
     x, y, z,
-    k=0.1,                  # spring constant
+    k=0.05,                  # spring constant
     m=1.0,                  # mass of projectile
-    start_pos=(0.2, 0.2, 0.2),  # starting position
+    start_pos=(0.22947800772124752, -0.4589100056285989, 0.1595762961666112),  # starting position
     g=9.81,
     num_points=100
 ):
     # --- Axis limits (adjust as needed) ---
-    X_MIN, X_MAX = 0.0, 1.5
-    Y_MIN, Y_MAX = -0.2, 0.7
-    Z_MIN, Z_MAX = 0.2, 1.5
+    X_MIN, X_MAX = 0.0, 0.8
+    Y_MIN, Y_MAX = -0.4589100056285989, 0.9
+    Z_MIN, Z_MAX = 0.13, 1.5
 
     # Swap axes
     temp = y
