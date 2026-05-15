@@ -14,26 +14,10 @@
     <node name="slingshot_node" pkg="fuming_feathers" type="slingshot_node.py" output="screen">
     </node>
 
-    <node name="game_backend" pkg="fuming_feathers" type="game_backend2.py" output="screen">
-    </node>
-
-    <node name="game_ui" pkg="fuming_feathers" type="game_ui.py" output="screen">
+    <node name="game_engine" pkg="fuming_feathers" type="game_engine.py" output="screen">
     </node>
 
     <node name="enemy_detector" pkg="fuming_feathers" type="depthless_enemy_detector.py" output="screen">
     </node>
-
-    <!--node name="panda_output" pkg="fuming_feathers" type="panda_output.py" output="screen">
-    </node-->
-    
-    <!--node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen">
-    <param name="publish_frequency" value="50.0"/>
-    </node>
-
-    <node name="falcon" pkg="falcon_ros" type="driver" output="screen">
-        <param name="frame_id" value="falcon_front"/>
-    </node>
-
-    <node name="falcon_grip_state" pkg="falcon_ros" type="grip_state"/-->
 
 </launch>
