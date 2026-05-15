@@ -34,7 +34,7 @@ class SlingshotNode:
         )
 
         # Falcon scaling factor (must match falcon_input.py)
-        self.scale = 2.0
+        self.scale = 5.0
 
         rospy.loginfo("Slingshot node ready (RViz mouide)")
 
