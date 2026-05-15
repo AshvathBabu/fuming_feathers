@@ -120,7 +120,7 @@ class Idle(smach.State):
         smach.State.__init__(self, outcomes=["button_pressed"])
         self.data = data
 
-    def execute(self, userdata):
+    def execute(self, data):
         rate = rospy.Rate(20)
         with self.data.lock:
             self.data.current_state = GameState.IDLE
@@ -137,7 +137,6 @@ class Idle(smach.State):
                 pressed = self.data.button_down
             if pressed:
                 if not self.data.game_started:
-                    self.data.detectorflag.publish(Bool(data=True))
                     self.data.game_started = True
                 return "button_pressed"
             rate.sleep()
@@ -148,7 +147,7 @@ class Pulling(smach.State):
         smach.State.__init__(self, outcomes=["button_released"])
         self.data = data
 
-    def execute(self, userdata):
+    def execute(self, data):
         rate = rospy.Rate(20)
         with self.data.lock:
             self.data.current_state = GameState.PULLING
@@ -165,7 +164,7 @@ class Released(smach.State):
         smach.State.__init__(self, outcomes=["immediate"])
         self.data = data
 
-    def execute(self, userdata):
+    def execute(self, data):
         with self.data.lock:
             self.data.current_state = GameState.RELEASED
         return "immediate"
@@ -176,7 +175,7 @@ class Firing(smach.State):
         smach.State.__init__(self, outcomes=["fired"])
         self.data = data
 
-    def execute(self, userdata):
+    def execute(self, data):
         with self.data.lock:
             self.data.current_state = GameState.FIRING
             self.data.last_fire_time = rospy.get_time()
@@ -188,7 +187,7 @@ class Reset(smach.State):
         smach.State.__init__(self, outcomes=["next_round", "game_over"])
         self.data = data
 
-    def execute(self, userdata):
+    def execute(self, data):
         rate = rospy.Rate(20)
         with self.data.lock:
             self.data.current_state = GameState.RESET
@@ -209,7 +208,8 @@ class Reset(smach.State):
                 if rounds_done >= MAX_ROUNDS:
                     return "game_over"
                 else:
-                    self.data.detectorflag.publish(Bool(data=False))
+
+                    self.data.detectorflag.publish(Bool(data=True))
                     return "next_round"
             rate.sleep()
 
@@ -219,7 +219,7 @@ class Score(smach.State):
         smach.State.__init__(self, outcomes=["play_again"])
         self.data = data
 
-    def execute(self, userdata):
+    def execute(self, data):
         rate = rospy.Rate(20)
         with self.data.lock:
             self.data.current_state = GameState.SCORE
