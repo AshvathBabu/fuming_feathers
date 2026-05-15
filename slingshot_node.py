@@ -13,7 +13,9 @@ from geometry_msgs.msg import TwistStamped, Point, Pose
 from visualization_msgs.msg import Marker
 from moveit_commander import MoveGroupCommander
 from slingshot_sim import simulate_slingshot
+from franka_msgs.msg import ErrorRecoveryActionGoal #for error reset
 from moveit_msgs.msg import DisplayTrajectory
+from std_msgs.msg import Bool
 
 class SlingshotNode:
     def __init__(self):
@@ -25,13 +27,22 @@ class SlingshotNode:
             TwistStamped,
             self.callback
         )
-
+        
+        self.sub = rospy.Subscriber(
+            "/fuming_feathers/detector_flag",
+            Bool,
+            self.reset_everything
+        )
+        
         # --- Publisher for RViz visualization ---
         self.marker_pub = rospy.Publisher(
             "/slingshot_trajectory",
             Marker,
             queue_size=1
         )
+
+        #publisher for error reset
+        self.error_pub =rospy.Publisher('/franka_control/error_recovery/goal', ErrorRecoveryActionGoal, queue_size=1)
 
         # Falcon scaling factor (must match falcon_input.py)
         self.scale = 2.0
@@ -72,6 +83,33 @@ class SlingshotNode:
 
         self.marker_pub.publish(marker)
 
+
+    def reset_everything(self, msg):
+        
+        #reset errors
+        if msg.data == True:
+            error = ErrorRecoveryActionGoal()
+            self.error_pub.publish(error)
+
+            #go up
+            group= MoveGroupCommander("arm")
+            p_2 = group.get_current_pose()
+            p_2.pose.position.z+=0.2
+            
+            group.set_pose_target(p_2)
+            group.go(wait=True)
+            group.clear_pose_targets
+
+            #go back to start
+            group1= MoveGroupCommander("arm")
+            p_3 = group.get_current_pose()
+            
+
+            group1.set_named_target("fuming_feathers_start")
+            group1.go(wait=True)
+            group1.clear_pose_targets
+    
+
     # ---------------------------------------
     # Callback when Falcon publishes data
     # ---------------------------------------
@@ -108,11 +146,14 @@ class SlingshotNode:
             pt.orientation.w = 0.002902145362304433
             poses.append(pt)
         mgc= MoveGroupCommander("arm")
-        traj, fraction = mgc.compute_cartesian_path(poses, 0.002)
+        traj, fraction = mgc.compute_cartesian_path(poses, 0.1)
+        traj = mgc.retime_trajectory(mgc.get_current_state(), traj, 1.0, 1.0, "time_optimal_trajectory_generation")
         rospy.loginfo(f"robot could follow through {fraction*100:.2}% of the throwing path")
         trajectory_pub = rospy.Publisher('slingshot_robot_trajectory', DisplayTrajectory, queue_size= 1, latch= True)
         trajectory_pub.publish(DisplayTrajectory(trajectory = [traj]))
         mgc.execute(traj)
+
+        
 
 
 if __name__ == "__main__":
