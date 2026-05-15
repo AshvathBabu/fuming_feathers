@@ -13,7 +13,6 @@ clock = pygame.time.Clock()
 running = True
 BASE_DIR = os.path.dirname(__file__)
 
-#We created a class with user defined constants for each gamestate
 class GameState(Enum):
     IDLE = 0
     PULLING = 1
@@ -22,7 +21,6 @@ class GameState(Enum):
     RESET = 4
     SCORE = 5
 
-#Helps us link the enums defined to the instruction instructions key
 STATE_TO_INSTRUCTION = {
     GameState.IDLE: "idle",
     GameState.PULLING: "pulling",
@@ -32,7 +30,6 @@ STATE_TO_INSTRUCTION = {
     GameState.SCORE: "score",
 }
 
-#These will be the instructions that will be output
 INSTRUCTIONS = {
     "idle": {
         "heading": "Welcome to Fuming Feathers!",
@@ -66,7 +63,7 @@ INSTRUCTIONS = {
     },
     "score": {
         "heading": "Justice Served!",
-        "instruction": "Your final score:", #Please render the score below this
+        "instruction": "Your final score:",
         "sub": "Press 'X' to return to the main menu.",
     },
     "reset": {
@@ -75,43 +72,37 @@ INSTRUCTIONS = {
         "sub": "",
     },
 }
-#The default state of the game in case there is nothing working
+
 WAIT_CASE = {
     "heading": "",
     "instruction": "Installing Bird feathers...wait this isn't right",
     "sub": "",
 }
 
-#Set max round constants
 MAX_ROUNDS = 3
 
 
 class GameData:
     def __init__(self):
         self.lock = threading.Lock()
-        #Gamestate inits
         self.current_state = GameState.IDLE
         self.current_score = 0
         self.total_score = 0
-        #create a list for scores
         self.round_scores = []
         self.game_started = False
-        self.round_count = 0 #Must be incremented to 3 later during reset
+        self.round_count = 0
         self.last_fire_time = 0
         self.cooldown_time = 2.0
-        #Initial button state
         self.button_down = False
-
         self.advance_round = False
         self.goto_menu = False
 
-        #Publishers
-        #Start enemy detector (true) and reset the enemy dectector (false)
+        # Publishers
         self.detectorflag = rospy.Publisher('/fuming_feathers/detector_flag', Bool, queue_size=1)
-
-        # Subscribers
+        #Subscriber
         rospy.Subscriber("/fuming_feathers/score", Int32, self.score_callback)
         rospy.Subscriber("/falcon/centre_button_state", Bool, self.button_callback)
+        rospy.loginfo("[GameData] Subscribed to /falcon/centre_button_state")
 
     def button_callback(self, msg):
         with self.lock:
@@ -127,7 +118,6 @@ class GameData:
 
 class Idle(smach.State):
     def __init__(self, data):
-        #You can only really have a button press as an outcome of this smach state
         smach.State.__init__(self, outcomes=["button_pressed"])
         self.data = data
 
@@ -146,13 +136,11 @@ class Idle(smach.State):
         while not rospy.is_shutdown():
             with self.data.lock:
                 pressed = self.data.button_down
-            #flag true for the enemy detector to start counting
             if pressed:
                 if not self.data.game_started:
                     self.data.detectorflag.publish(Bool(data=True))
                     self.data.game_started = True
                 return "button_pressed"
-            #Switches to PULLING state
             rate.sleep()
 
 
@@ -169,7 +157,6 @@ class Pulling(smach.State):
             with self.data.lock:
                 pressed = self.data.button_down
             if not pressed:
-                #Switches to RELEASED state
                 return "button_released"
             rate.sleep()
 
@@ -182,7 +169,7 @@ class Released(smach.State):
     def execute(self, userdata):
         with self.data.lock:
             self.data.current_state = GameState.RELEASED
-        return "immediate" #this is an immediate switch to the FIRING stage
+        return "immediate"
 
 
 class Firing(smach.State):
@@ -194,12 +181,11 @@ class Firing(smach.State):
         with self.data.lock:
             self.data.current_state = GameState.FIRING
             self.data.last_fire_time = rospy.get_time()
-        return "fired" #transitions to reset status
+        return "fired"
 
 
 class Reset(smach.State):
     def __init__(self, data):
-        #Here we have 2 outcomes when either the game state resets to the beginning or goes to the game over screen
         smach.State.__init__(self, outcomes=["next_round", "game_over"])
         self.data = data
 
@@ -212,7 +198,6 @@ class Reset(smach.State):
             self.data.total_score += round_score
             self.data.current_score = 0
 
-        #Here the cooldown will occur for the arm to return to its initial state
         while not rospy.is_shutdown():
             with self.data.lock:
                 advance = self.data.advance_round
@@ -223,11 +208,10 @@ class Reset(smach.State):
                     rounds_done = self.data.round_count
 
                 if rounds_done >= MAX_ROUNDS:
-                    #If done with 3 rounds we end the game and give a string to switch to score screen
                     return "game_over"
                 else:
                     self.data.detectorflag.publish(Bool(data=False))
-                    return "next_round" #switches to the idle state
+                    return "next_round"
             rate.sleep()
 
 
@@ -241,7 +225,6 @@ class Score(smach.State):
         with self.data.lock:
             self.data.current_state = GameState.SCORE
 
-        #Button to restart is shown which provides a fresh restart
         while not rospy.is_shutdown():
             with self.data.lock:
                 go = self.data.goto_menu
@@ -253,32 +236,30 @@ class Score(smach.State):
                     self.data.current_score = 0
                     self.data.total_score = 0
                     self.data.round_scores = []
-                self.data.detectorflag.publish(Bool(data=False))#send a flag to enemy dectector to reset
-                return "play_again" #switches to idle
+                self.data.detectorflag.publish(Bool(data=False))
+                return "play_again"
             rate.sleep()
 
 
 if __name__ == "__main__":
+    # rospy.init_node MUST come before GameData() so subscribers register correctly
     rospy.init_node("GameEngine", disable_signals=True)
     data = GameData()
-    
-    # Function to process ROS callbacks in a separate thread
+
     def ros_spin():
         rospy.spin()
-    
-    # Start ROS spinner thread to handle incoming messages
+
     ros_thread = threading.Thread(target=ros_spin, daemon=True)
     ros_thread.start()
-    
-    #sets up the state machine for the
+
     sm = smach.StateMachine(outcomes=["shutdown"])
     with sm:
-        smach.StateMachine.add("IDLE", Idle(data), transitions={"button_pressed": "PULLING"})
-        smach.StateMachine.add("PULLING", Pulling(data), transitions={"button_released": "RELEASED"})
-        smach.StateMachine.add("RELEASED", Released(data), transitions={"immediate": "FIRING"})
-        smach.StateMachine.add("FIRING", Firing(data), transitions={"fired": "RESET"})
-        smach.StateMachine.add("RESET", Reset(data), transitions={"next_round": "IDLE", "game_over": "SCORE"})
-        smach.StateMachine.add("SCORE", Score(data), transitions={"play_again": "IDLE"})
+        smach.StateMachine.add("IDLE",     Idle(data),     transitions={"button_pressed":  "PULLING"})
+        smach.StateMachine.add("PULLING",  Pulling(data),  transitions={"button_released": "RELEASED"})
+        smach.StateMachine.add("RELEASED", Released(data), transitions={"immediate":        "FIRING"})
+        smach.StateMachine.add("FIRING",   Firing(data),   transitions={"fired":            "RESET"})
+        smach.StateMachine.add("RESET",    Reset(data),    transitions={"next_round": "IDLE", "game_over": "SCORE"})
+        smach.StateMachine.add("SCORE",    Score(data),    transitions={"play_again":       "IDLE"})
 
     threading.Thread(target=sm.execute, daemon=True).start()
 
@@ -287,10 +268,10 @@ if __name__ == "__main__":
         (1280, 720)
     )
     font = {
-        "heading": pygame.font.SysFont(None, 64),
+        "heading":     pygame.font.SysFont(None, 64),
         "instruction": pygame.font.SysFont(None, 50),
-        "sub": pygame.font.SysFont(None, 26),
-        "score": pygame.font.SysFont(None, 120),
+        "sub":         pygame.font.SysFont(None, 26),
+        "score":       pygame.font.SysFont(None, 120),
         "round_score": pygame.font.SysFont(None, 38),
         "round_label": pygame.font.SysFont(None, 32),
     }
@@ -312,24 +293,24 @@ if __name__ == "__main__":
                         data.goto_menu = True
 
         screen.blit(bg_image, (0, 0))
-        #ensure there are no race conditions
+
         with data.lock:
-            state = data.current_state
-            score = data.current_score
+            state       = data.current_state
+            score       = data.current_score
             total_score = data.total_score
             round_count = data.round_count
             round_scores = list(data.round_scores)
 
-        key = STATE_TO_INSTRUCTION.get(state, "idle")
+        key     = STATE_TO_INSTRUCTION.get(state, "idle")
         content = INSTRUCTIONS.get(key, WAIT_CASE)
 
         heading_surf = font["heading"].render(content["heading"], True, (7, 57, 60))
-        instr_surf = font["instruction"].render(content["instruction"], True, (0, 0, 0))
-        sub_surf = font["sub"].render(content["sub"], True, (44, 102, 110))
-        #make it center
+        instr_surf   = font["instruction"].render(content["instruction"], True, (0, 0, 0))
+        sub_surf     = font["sub"].render(content["sub"], True, (44, 102, 110))
+
         screen.blit(heading_surf, (640 - heading_surf.get_width() // 2, 200))
-        screen.blit(instr_surf, (640 - instr_surf.get_width() // 2, 320))
-        screen.blit(sub_surf, (640 - sub_surf.get_width() // 2, 420))
+        screen.blit(instr_surf,   (640 - instr_surf.get_width()   // 2, 320))
+        screen.blit(sub_surf,     (640 - sub_surf.get_width()     // 2, 420))
 
         if state not in (GameState.IDLE, GameState.SCORE):
             label = font["round_label"].render(
