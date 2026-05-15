@@ -261,6 +261,15 @@ class Score(smach.State):
 if __name__ == "__main__":
     rospy.init_node("GameEngine", disable_signals=True)
     data = GameData()
+    
+    # Function to process ROS callbacks in a separate thread
+    def ros_spin():
+        rospy.spin()
+    
+    # Start ROS spinner thread to handle incoming messages
+    ros_thread = threading.Thread(target=ros_spin, daemon=True)
+    ros_thread.start()
+    
     #sets up the state machine for the
     sm = smach.StateMachine(outcomes=["shutdown"])
     with sm:
