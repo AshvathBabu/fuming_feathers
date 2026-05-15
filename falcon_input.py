@@ -114,7 +114,7 @@ class falcon:
     def publish_panda_command(self, vector):
         twist = TwistStamped()
         twist.header.frame_id = "panda_hand_tcp"
-        scale = 2.0 #multiply with distance to get vel, so this is 0.2 m/s for 10cm
+        scale = 5.0 #multiply with distance to get vel, so this is 0.2 m/s for 10cm
 
         #set twist linear velocity fields x,y,z
         twist.twist.linear.x = vector[0] * scale
