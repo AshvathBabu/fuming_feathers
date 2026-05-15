@@ -14,12 +14,12 @@ def simulate_slingshot(
     m=1.0,                  # mass of projectile
     start_pos=(0.22947800772124752, -0.4589100056285989, 0.1595762961666112),  # starting position
     g=9.81,
-    num_points=100
+    num_points=1000
 ):
     # --- Axis limits (adjust as needed) ---
-    X_MIN, X_MAX = -1000000, 10000
-    Y_MIN, Y_MAX = -1000000, 10000
-    Z_MIN, Z_MAX = -1000000, 10000
+    X_MIN, X_MAX = 0, 0.32
+    Y_MIN, Y_MAX = -0.5, 0.3
+    Z_MIN, Z_MAX = 0.14, 0.8
 
     # --- Step 1: Compute pull length ---
     L = np.sqrt(x**2 + y**2 + z**2)
