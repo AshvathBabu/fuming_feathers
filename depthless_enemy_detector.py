@@ -38,12 +38,12 @@ class enemy_detector:
         self.blocks_initialized = False
         self.suspected_knockdown = {}
         self.confirmed_knockdown = {}
-        self.frames_to_confirm = 10 #note: pls lower if score is not happening
+        self.frames_to_confirm = 60 #note: pls lower if score is not happening
         
         #hsv color ranges - CHANGE IF ERRORS
         self.color_ranges = {
             'red':   ([0, 160, 75],   [10, 200, 180]),
-            'green': ([46, 125, 34], [66, 170, 140]),
+            'green': ([46, 78, 34], [66, 170, 140]),
             'blue':  ([91, 160, 65], [111, 220, 170])
         }
         
@@ -88,7 +88,7 @@ class enemy_detector:
         for color in self.color_ranges.keys():
             contours = self.get_contours_for_color(hsv, color)
             current_counts[color] = self.get_block_count(contours)
-            
+        
             #draw green boxes
             for cnt in contours:
                 if cv2.contourArea(cnt) > 100:
@@ -111,8 +111,8 @@ class enemy_detector:
                 self.suspected_knockdown[color] = self.suspected_knockdown.get(color, 0) + (initial - current)
                 self.confirmed_knockdown[color] = self.confirmed_knockdown.get(color, 0) + 1
                 
-                if self.confirmation_counter[color] >= self.frames_to_confirm:
-                    #confirmed knockdown if knocked down even if hand covers
+                if self.confirmed_knockdown[color] >= self.frames_to_confirm:
+                    #confirmed knoe[color] >= sckdown if knocked down even if hand covers
                     points = self.points_per_color.get(color, 0) * self.suspected_knockdown[color]
                     self.score_pub.publish(points)
                     print(f"{color} block knocked down! +{points} points")
