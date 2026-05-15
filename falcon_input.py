@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 import rospy
+import threading
 from geometry_msgs.msg import PoseStamped, WrenchStamped, TwistStamped
 from sensor_msgs.msg import Joy
 import numpy as np
 import time
+from std_msgs.msg import Bool
 
 class falcon:
 #sets up publishers, subscribers, init variables
     def __init__(self): 
+        self.lock = threading.Lock()
+
         self.servo_cf_msg = WrenchStamped()
         self.servo_cf_msg.header.frame_id = 'falcon_grip'
 
@@ -15,9 +19,12 @@ class falcon:
         self.pub = rospy.Publisher('falcon/servo_cf', WrenchStamped, queue_size=1)
             #for panda Twist messages
         self.velocity_pub = rospy.Publisher('/fuming_feathers/velocity_cmd', TwistStamped, queue_size=1)
+        self.button_state_pub = rospy.Publisher('/falcon/centre_button_state', Bool, queue_size=1) 
+
         #subscribers
         self.position_sub = rospy.Subscriber('falcon/measured_cp', PoseStamped, self.get_position)
         self.joy_sub = rospy.Subscriber('falcon/joy', Joy, self.joy_callback)
+        
         #initial variables
         self.gain = rospy.get_param('~gain', 100.0)
         self.setpoint_cp = None
@@ -62,21 +69,24 @@ class falcon:
         #checks buttons, throws error if not 4
         assert len(msg.buttons) == 4, "Expected standard 4 grip buttons"
         #exit if no position data
-        if self.position is None:
-            return
+        with self.lock:
+            if self.position is None:
+                return
         
-        #added, press detection for center
-        CENTER_BUTTON = 2 # let center be index 2
-        current_button_state = (msg.buttons[CENTER_BUTTON] == 1)
-        
-        #checks press in the moment, and save position from initial press
-        if current_button_state == True and self.button_pressed == False:
-            self.pull_start_pos = self.position.copy()
-            self.pulling = True #currently pulling
-            rospy.loginfo("Center button pressed, pull started")
+            #added, press detection for center
+            CENTER_BUTTON = 2 # let center be index 2
+            current_button_state = (msg.buttons[CENTER_BUTTON] == 1)
+            
+            #checks press in the moment, and save position from initial press
+            if current_button_state == True and self.button_pressed == False:
+                self.pull_start_pos = self.position.copy()
+                self.pulling = True #currently pulling
+                rospy.loginfo("Center button pressed, pull started")
 
             # Update button state for next time
-        self.button_pressed = current_button_state
+            self.button_pressed = current_button_state
+
+        self.button_state_pub.publish(Bool(data=current_button_state))
 
 #get current position
     def get_position(self, msg): 
@@ -114,7 +124,7 @@ class falcon:
     def publish_panda_command(self, vector):
         twist = TwistStamped()
         twist.header.frame_id = "panda_hand_tcp"
-        scale = 5.0 #multiply with distance to get vel, so this is 0.2 m/s for 10cm
+        scale = 2.0 #multiply with distance to get vel, so this is 0.2 m/s for 10cm
 
         #set twist linear velocity fields x,y,z
         twist.twist.linear.x = vector[0] * scale
