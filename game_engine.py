@@ -57,9 +57,9 @@ INSTRUCTIONS = {
         "sub": "",
     },
     "cooldown": {
-        "heading": "That'll show em!",
-        "instruction": "Reloading and Irritating the next bird...",
-        "sub": "Press 'W' when blocks are reset and you're ready for the next round.",
+        "heading": "Resetting Stage",
+        "instruction": "Press 'w' to continue, Wait for the robot to stop moving",
+        "sub": "",
     },
     "score": {
         "heading": "Justice Served!",
@@ -68,7 +68,7 @@ INSTRUCTIONS = {
     },
     "reset": {
         "heading": "Resetting Stage",
-        "instruction": "Place the blocks corresponding with our round template, Then Press 'w' to continue",
+        "instruction": "Press 'w' to continue, Wait for the robot to stop moving",
         "sub": "",
     },
 }
@@ -208,8 +208,8 @@ class Reset(smach.State):
                 if rounds_done >= MAX_ROUNDS:
                     return "game_over"
                 else:
-
                     self.data.detectorflag.publish(Bool(data=True))
+                    rospy.sleep(3)
                     return "next_round"
             rate.sleep()
 
@@ -235,7 +235,7 @@ class Score(smach.State):
                     self.data.current_score = 0
                     self.data.total_score = 0
                     self.data.round_scores = []
-                self.data.detectorflag.publish(Bool(data=False))
+                self.data.detectorflag.publish(Bool(data=True))
                 return "play_again"
             rate.sleep()
 
