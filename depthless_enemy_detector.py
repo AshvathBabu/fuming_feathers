@@ -38,13 +38,13 @@ class enemy_detector:
         self.blocks_initialized = False
         self.suspected_knockdown = {}
         self.confirmed_knockdown = {}
-        self.frames_to_confirm = 60 #note: pls lower if score is not happening
+        self.frames_to_confirm = 30 #note: pls lower if score is not happening
         
         #hsv color ranges - CHANGE IF ERRORS
         self.color_ranges = {
             'red':   ([0, 160, 75],   [10, 200, 180]),
-            'green': ([46, 78, 34], [66, 170, 140]),
-            'blue':  ([91, 160, 65], [111, 220, 170])
+            'green': ([46, 78, 34], [70, 170, 140]),
+            'blue':  ([91, 130, 65], [111, 220, 170])
         }
         
         #point/scoring system
