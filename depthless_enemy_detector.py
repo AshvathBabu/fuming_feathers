@@ -112,7 +112,7 @@ class enemy_detector:
                 self.confirmed_knockdown[color] = self.confirmed_knockdown.get(color, 0) + 1
                 
                 if self.confirmed_knockdown[color] >= self.frames_to_confirm:
-                    #confirmed knoe[color] >= sckdown if knocked down even if hand covers
+                    #confirmed knockdown if the knockdown persists for multiple frames, not just a camera cover
                     points = self.points_per_color.get(color, 0) * self.suspected_knockdown[color]
                     self.score_pub.publish(points)
                     print(f"{color} block knocked down! +{points} points")
